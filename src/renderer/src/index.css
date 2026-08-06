@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+
+/*
+ * Ordino design tokens (§8): one accent, semantic status colors, three
+ * surface elevations per scheme. Dark mode follows the OS via
+ * prefers-color-scheme; every token flips here and nowhere else.
+ */
+:root {
+  --ord-accent: oklch(0.55 0.19 265);
+  --ord-accent-strong: oklch(0.48 0.21 265);
+  --ord-accent-soft: oklch(0.94 0.04 265);
+  --ord-on-accent: oklch(0.99 0.01 265);
+
+  --ord-new: oklch(0.55 0.15 150);
+  --ord-new-soft: oklch(0.95 0.05 150);
+  --ord-dupe: oklch(0.68 0.14 75);
+  --ord-dupe-soft: oklch(0.96 0.06 85);
+  --ord-danger: oklch(0.55 0.19 25);
+  --ord-danger-soft: oklch(0.95 0.04 25);
+
+  --ord-surface-0: oklch(0.985 0.002 265); /* window */
+  --ord-surface-1: oklch(1 0 0); /* pane */
+  --ord-surface-2: oklch(0.965 0.004 265); /* card / inset */
+  --ord-border: oklch(0.9 0.005 265);
+  --ord-border-strong: oklch(0.82 0.008 265);
+
+  --ord-text: oklch(0.25 0.01 265);
+  --ord-text-secondary: oklch(0.45 0.015 265);
+  --ord-text-faint: oklch(0.6 0.012 265);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ord-accent: oklch(0.68 0.16 265);
+    --ord-accent-strong: oklch(0.75 0.15 265);
+    --ord-accent-soft: oklch(0.28 0.06 265);
+    --ord-on-accent: oklch(0.15 0.03 265);
+
+    --ord-new: oklch(0.72 0.14 150);
+    --ord-new-soft: oklch(0.27 0.05 150);
+    --ord-dupe: oklch(0.75 0.12 80);
+    --ord-dupe-soft: oklch(0.28 0.05 85);
+    --ord-danger: oklch(0.68 0.16 25);
+    --ord-danger-soft: oklch(0.27 0.05 25);
+
+    --ord-surface-0: oklch(0.19 0.008 265);
+    --ord-surface-1: oklch(0.23 0.009 265);
+    --ord-surface-2: oklch(0.27 0.01 265);
+    --ord-border: oklch(0.32 0.01 265);
+    --ord-border-strong: oklch(0.42 0.012 265);
+
+    --ord-text: oklch(0.93 0.004 265);
+    --ord-text-secondary: oklch(0.72 0.01 265);
+    --ord-text-faint: oklch(0.55 0.012 265);
+  }
+}
+
+@theme inline {
+  --color-accent: var(--ord-accent);
+  --color-accent-strong: var(--ord-accent-strong);
+  --color-accent-soft: var(--ord-accent-soft);
+  --color-on-accent: var(--ord-on-accent);
+
+  --color-new: var(--ord-new);
+  --color-new-soft: var(--ord-new-soft);
+  --color-dupe: var(--ord-dupe);
+  --color-dupe-soft: var(--ord-dupe-soft);
+  --color-danger: var(--ord-danger);
+  --color-danger-soft: var(--ord-danger-soft);
+
+  --color-surface-0: var(--ord-surface-0);
+  --color-surface-1: var(--ord-surface-1);
+  --color-surface-2: var(--ord-surface-2);
+  --color-line: var(--ord-border);
+  --color-line-strong: var(--ord-border-strong);
+
+  --color-ink: var(--ord-text);
+  --color-ink-secondary: var(--ord-text-secondary);
+  --color-ink-faint: var(--ord-text-faint);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-0 text-ink antialiased select-none;
+  font-size: 14px;
+}
+
+/* Text inputs and editable regions keep normal selection behavior. */
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

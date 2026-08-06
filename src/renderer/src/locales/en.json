@@ -1,0 +1,312 @@
+{
+  "app": {
+    "name": "Ordino",
+    "tagline": "AI-powered file organizer"
+  },
+  "steps": {
+    "folder": "Folder",
+    "options": "Options",
+    "review": "Review",
+    "done": "Done"
+  },
+  "topbar": {
+    "settings": "Settings",
+    "history": "History"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "retry": "Retry",
+    "close": "Close",
+    "undo": "Undo",
+    "apply": "Apply",
+    "save": "Save",
+    "files_one": "{{count}} file",
+    "files_other": "{{count}} files",
+    "folders_one": "{{count}} folder",
+    "folders_other": "{{count}} folders",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items"
+  },
+  "home": {
+    "dropTitle": "Drop a messy folder here",
+    "dropOr": "or",
+    "browse": "Browse…",
+    "dropHint": "Ordino analyzes file names and dates — never file contents.",
+    "notAFolder": "That wasn't a folder — drop a folder to get started.",
+    "recentTitle": "Recent folders",
+    "recentOrganized": "Organized {{when}}",
+    "recentNever": "Not organized yet"
+  },
+  "scan": {
+    "title": "What's in {{name}}",
+    "summary": "{{files}} · {{dirs}} · {{size}}",
+    "subfolderTitle": "Choose which subfolders to include",
+    "subfolderHint": "Skipped folders are left untouched, but can still be used as destinations.",
+    "includeAll": "Include all",
+    "skipAll": "Skip all",
+    "skippedBadge": "skipped",
+    "managedBadge": "Ordino",
+    "willAnalyze_one": "{{count}} file will be analyzed",
+    "willAnalyze_other": "{{count}} files will be analyzed",
+    "emptyFolder": "This folder has no files to organize.",
+    "chooseStrategy": "Choose strategy",
+    "rerun": {
+      "banner": "Organized before with {{strategy}} · {{inPlace}} files still in place · {{new}} new",
+      "alreadyOrganized": "Already organized — nothing to do",
+      "alreadyOrganizedHint": "Every file is where the last run put it. Add new files and run Ordino again, or re-organize from scratch.",
+      "reorganizeEverything": "Re-organize everything",
+      "reorganizeWarning": "Ignores the previous organization and re-plans every file. Your files are still never touched before you review and apply."
+    }
+  },
+  "strategy": {
+    "title": "How should files be organized?",
+    "smart": {
+      "name": "Smart Categories",
+      "description": "AI infers purpose from names and dates",
+      "example": "Invoices · Screenshots · 3D Models"
+    },
+    "fileType": {
+      "name": "File Type",
+      "description": "Group by extension family",
+      "example": "Documents · Images · Audio"
+    },
+    "date": {
+      "name": "Date",
+      "description": "Group by when files were created",
+      "example": "2024 · 2025 · 2026",
+      "granularity": "Granularity",
+      "year": "Year",
+      "yearMonth": "Year + Month"
+    },
+    "custom": {
+      "name": "Custom Instruction",
+      "description": "Tell the AI exactly what you want",
+      "placeholder": "e.g. separate work files from personal, put anything 3D-printing related in one folder",
+      "verbatimNote": "Sent to the model exactly as written."
+    },
+    "reuseExisting": "Prefer existing folders as destinations",
+    "reuseExistingHint": "When off, Ordino always proposes new folders.",
+    "reuseForcedRerun": "Re-runs always reuse the structure from the previous run.",
+    "mismatchWarning": "This folder was organized with {{previous}}. Mixing strategies can produce an inconsistent structure.",
+    "mismatchContinue": "Continue anyway",
+    "mismatchReorganize": "Re-organize everything instead",
+    "analyze": "Analyze folder"
+  },
+  "analysis": {
+    "title": "Analyzing {{name}}",
+    "preparing": "Preparing file manifest",
+    "analyzing": "Analyzing files · {{done}} / {{total}}",
+    "waitingModel": "The model is reading the file list…",
+    "chunk": "Batch {{current}} of {{total}}",
+    "repairing": "Tidying up the model's answer",
+    "assembling": "Assembling plan",
+    "duplicates": "Checking for duplicates · {{hashed}} / {{candidates}} candidates",
+    "duplicatesDone_zero": "No duplicates found",
+    "duplicatesDone_one": "{{count}} duplicate group found",
+    "duplicatesDone_other": "{{count}} duplicate groups found",
+    "providerNotConfigured": "Ordino needs an AI provider before it can analyze files.",
+    "openSettings": "Open Settings"
+  },
+  "review": {
+    "title": "Review the plan",
+    "currentPane": "Now",
+    "proposedPane": "After",
+    "summary": "{{moves}} → {{folders}} ({{newFolders}} new)",
+    "summaryDuplicates_one": "{{count}} duplicate flagged",
+    "summaryDuplicates_other": "{{count}} duplicates flagged",
+    "summaryExcluded_one": "{{count}} excluded",
+    "summaryExcluded_other": "{{count}} excluded",
+    "applyMoves_one": "Move {{count}} file",
+    "applyMoves_other": "Move {{count}} files",
+    "applyNothing": "Nothing selected to move",
+    "newBadge": "new",
+    "editedBadge": "reassigned by you",
+    "expandChanges": "Expand changes",
+    "collapseAll": "Collapse all",
+    "approveAll": "Approve all ({{count}})",
+    "rejectAll": "Reject all ({{count}})",
+    "moreLinks": "+{{count}} more",
+    "detail": {
+      "from": "From",
+      "to": "To",
+      "reason": "Why",
+      "include": "Include in apply",
+      "reassign": "Move to a different folder",
+      "newFolder": "New folder…"
+    },
+    "duplicates": {
+      "title_one": "{{count}} duplicate group",
+      "title_other": "{{count}} duplicate groups",
+      "groupSummary": "{{count}} identical copies · {{size}} each",
+      "keep": "Keep",
+      "trash": "Move to Trash",
+      "recommended": "Recommended keeper",
+      "keeperReason": {
+        "organized": "Already at its organized destination",
+        "clean-name": "Cleanest file name",
+        "oldest": "Oldest copy — likely the original",
+        "shortest-path": "Closest to the folder root"
+      },
+      "trashOthers": "Trash the others",
+      "allTrashedWarning": "Every copy in this group is marked for Trash — keep at least one unless you're sure.",
+      "trashGhost_one": "→ Trash ({{count}})",
+      "trashGhost_other": "→ Trash ({{count}})"
+    },
+    "keyboardHint": "j/k to move · space to toggle · enter for details",
+    "exportPlan": "Export plan…",
+    "exportJson": "As JSON",
+    "exportMarkdown": "As Markdown",
+    "zeroMoves": "Everything already looks organized — the plan proposes no moves."
+  },
+  "apply": {
+    "title": "Organizing…",
+    "moving": "Moving {{done}} of {{total}} — {{file}}",
+    "trashing": "Moving duplicates to Trash",
+    "done": {
+      "title": "Folder organized",
+      "summary": "{{moved}} moved · {{skipped}} skipped · {{failed}} failed",
+      "trashed_one": "{{count}} duplicate sent to Trash",
+      "trashed_other": "{{count}} duplicates sent to Trash",
+      "collision": "{{from}} already existed in {{folder}} — saved as {{renamed}}",
+      "skippedTitle": "Skipped",
+      "failedTitle": "Failed",
+      "revealFolder": "Reveal folder",
+      "organizeAnother": "Organize another folder",
+      "viewHistory": "View history"
+    },
+    "undo": {
+      "confirmTitle": "Undo this organization?",
+      "running": "Putting files back…",
+      "done": "Everything is back where it was.",
+      "doneWithSkips_one": "{{count}} file couldn't be restored:",
+      "doneWithSkips_other": "{{count}} files couldn't be restored:",
+      "recoveryOffer": "The last apply didn't finish. Restore the files it had already moved?"
+    },
+    "skipReason": {
+      "locked": "The file is in use by another app",
+      "permission": "Ordino doesn't have permission to move it",
+      "missing": "The file is no longer at its expected location",
+      "occupied": "Another file now occupies the original spot",
+      "modified": "The file was changed after Ordino moved it",
+      "unknown": "Something unexpected went wrong"
+    }
+  },
+  "history": {
+    "title": "History",
+    "empty": "Nothing yet — apply your first plan and it'll show up here.",
+    "undoableBadge": "Undoable",
+    "undoneBadge": "Undone",
+    "pendingBadge": "Interrupted",
+    "entrySummary": "{{moved}} moved · {{trashed}} trashed"
+  },
+  "settings": {
+    "title": "Settings",
+    "provider": {
+      "title": "AI provider",
+      "claude": {
+        "name": "Claude Code",
+        "badge": "Default",
+        "description": "Uses the Claude Code app already installed on this machine, with its existing sign-in.",
+        "detected": "Claude Code {{version}} detected",
+        "detectedAt": "at {{path}}",
+        "notDetected": "Claude Code isn't installed (or couldn't be found).",
+        "notAuthenticated": "Claude Code isn't signed in — open a terminal and run `claude` once to sign in.",
+        "install": "Get Claude Code",
+        "pathOverride": "Path to claude binary (optional)",
+        "pathOverridePlaceholder": "Auto-detect",
+        "model": "Model",
+        "apiKeyOverride": "Anthropic API key (optional)",
+        "apiKeyOverrideHint": "Only needed if you don't want to use Claude Code's own sign-in.",
+        "help": {
+          "step1": "Install Claude Code from claude.com/claude-code (macOS, Windows, Linux).",
+          "step2": "Open a terminal, run `claude`, and sign in with your Claude account or an API key.",
+          "step3": "Come back here and press Test connection."
+        }
+      },
+      "openai": {
+        "name": "OpenAI-compatible API",
+        "description": "Any endpoint speaking the OpenAI Chat Completions format — OpenAI, OpenRouter, or a local model.",
+        "baseUrl": "Base URL",
+        "apiKey": "API key",
+        "apiKeyOptional": "API key (not needed for local endpoints)",
+        "model": "Model",
+        "fetchModels": "Fetch models",
+        "modelManualNote": "Couldn't list models from this endpoint — type the model name.",
+        "help": {
+          "openaiTitle": "OpenAI",
+          "openai1": "Base URL: https://api.openai.com/v1",
+          "openai2": "Create an API key at platform.openai.com → API keys.",
+          "openrouterTitle": "OpenRouter",
+          "openrouter1": "Base URL: https://openrouter.ai/api/v1",
+          "openrouter2": "Create a key at openrouter.ai → Keys.",
+          "ollamaTitle": "Ollama (local — nothing leaves your machine)",
+          "ollama1": "Install Ollama and pull a model: `ollama pull llama3.2`",
+          "ollama2": "Base URL: http://localhost:11434/v1 — leave the API key blank."
+        }
+      },
+      "testConnection": "Test connection",
+      "testing": "Testing…",
+      "testOk": "Connected — {{model}} responded in {{latency}}",
+      "keySaved": "Key saved in your system keychain",
+      "keyReplace": "Replace",
+      "keyClear": "Remove",
+      "keychainWarning": "This system stores keys without encryption (no keychain available)."
+    },
+    "ignore": {
+      "title": "Ignore patterns",
+      "hint": "Files and folders matching these patterns are never scanned. Hidden and system files are always excluded.",
+      "placeholder": "Add a pattern, e.g. node_modules or *.tmp",
+      "restoreDefaults": "Restore defaults"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "statement": "Ordino sends file names and metadata to your chosen AI provider — never file contents.",
+      "localNote": "With a local endpoint like Ollama, nothing leaves your machine at all."
+    }
+  },
+  "errors": {
+    "SCAN_FAILED": "Couldn't scan the folder. Try again.",
+    "SCAN_NOT_FOUND": "That folder doesn't exist anymore.",
+    "FOLDER_NOT_DIRECTORY": "That's a file, not a folder.",
+    "FOLDER_NOT_READABLE": "Ordino doesn't have permission to read this folder.",
+    "FOLDER_STATE_NOT_WRITABLE": "Ordino can't write its state into this folder — is it read-only?",
+    "PROVIDER_NOT_CONFIGURED": "No AI provider is configured yet.",
+    "PROVIDER_UNREACHABLE": "Couldn't reach the AI provider. Check your connection or provider settings.",
+    "PROVIDER_AUTH_FAILED": "The API key was rejected — check it's copied completely.",
+    "PROVIDER_BAD_ENDPOINT": "That URL doesn't look like an OpenAI-compatible endpoint — did you forget /v1?",
+    "PROVIDER_TIMEOUT": "The AI provider took too long to answer. Try again.",
+    "CLAUDE_NOT_INSTALLED": "Claude Code isn't installed — install it from claude.com/claude-code, or switch to an OpenAI-compatible endpoint.",
+    "CLAUDE_NOT_AUTHENTICATED": "Claude Code isn't signed in — open a terminal and run `claude` once.",
+    "CLAUDE_SPAWN_FAILED": "Claude Code couldn't be started. Check the binary path in Settings.",
+    "PLAN_MALFORMED": "The model returned an unusable plan. Trying again usually fixes this.",
+    "PLAN_EMPTY": "The model returned an empty plan.",
+    "ANALYSIS_CANCELLED": "Analysis cancelled.",
+    "APPLY_IN_PROGRESS": "An apply is already running.",
+    "APPLY_FAILED": "Applying the plan failed.",
+    "UNDO_NOT_AVAILABLE": "There's nothing to undo for this folder.",
+    "UNDO_FAILED": "Undo ran into a problem.",
+    "JOURNAL_CORRUPT": "This folder's Ordino history file is damaged and was reset.",
+    "SETTINGS_WRITE_FAILED": "Couldn't save settings.",
+    "SECRET_STORE_UNAVAILABLE": "The system keychain isn't available.",
+    "EXPORT_FAILED": "Couldn't export the plan.",
+    "UPDATE_FAILED": "Update check failed.",
+    "INVALID_REQUEST": "Something sent an invalid request — this is a bug in Ordino.",
+    "INTERNAL": "Something unexpected went wrong."
+  },
+  "models": {
+    "claude": {
+      "sonnet": "Sonnet — recommended",
+      "haiku": "Haiku — fastest",
+      "opus": "Opus — most capable"
+    }
+  },
+  "units": {
+    "b": "B",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
+  }
+}
