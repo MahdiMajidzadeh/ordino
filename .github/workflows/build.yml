@@ -2,9 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
-  pull_request:
 
 jobs:
   test:
@@ -19,22 +17,53 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
-  # Installers build per-OS (electron-builder cross-compiling is unreliable
-  # for signing and native bits). Artifacts publish to a draft GitHub release
-  # on tags, which also feeds electron-updater.
-  package:
+  # The three packaging jobs all upload into one release, so it has to exist
+  # first — otherwise they race to create it. It starts as a draft: a draft is
+  # invisible to electron-updater, so no user can pull a half-uploaded release.
+  release:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create the draft release if it doesn't exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — reusing it."
+          else
+            gh release create "$TAG" --draft --title "Ordino $TAG" --generate-notes
+          fi
+
+  # Installers build per-OS (electron-builder cross-compiling is unreliable
+  # for signing and native bits). Each job uploads its artifacts — the macOS
+  # .dmg, the Windows installer, the Linux AppImage/deb — to the draft
+  # release, which also feeds electron-updater.
+  package:
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-14
             script: build:mac
+            args: --x64 --arm64
           - os: windows-latest
             script: build:win
+            args: ''
           - os: ubuntu-latest
             script: build:linux
+            args: ''
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,9 +71,25 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run ${{ matrix.script }} -- --publish onTagOrDraft
+
+      # electron-builder names artifacts from package.json, and the app reads
+      # its version with app.getVersion() — which reads the same field. Both
+      # follow the tag once this rewrites it. Fails loudly on a tag that isn't
+      # semver, which is what we want: an unversionable tag can't ship.
+      - name: Stamp the version from the git tag
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: npm version --no-git-tag-version --allow-same-version "${TAG#v}"
+
+      - name: Build and upload installers
+        shell: bash
+        run: npm run ${{ matrix.script }} -- ${{ matrix.args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Baked into the main bundle so Settings → About can show the exact
+          # tag, not just the version derived from it.
+          MAIN_VITE_ORDINO_BUILD_REF: ${{ github.ref_name }}
           # --- Signing secrets (Phase 3 placeholders) ---------------------
           # macOS notarization:
           # APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -55,3 +100,19 @@ jobs:
           # Windows signing:
           # WIN_CSC_LINK: ${{ secrets.WIN_CERT_PFX_BASE64 }}
           # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+
+  # Only now, with every installer uploaded, does the release go public and
+  # become visible to the updater.
+  publish:
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release edit "$TAG" --draft=false --latest
