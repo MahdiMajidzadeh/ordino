@@ -1,11 +1,8 @@
 import { promises as fs } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
-import { execFile } from 'child_process'
-import { promisify } from 'util'
 import type { ClaudeDetection } from '@shared/types'
-
-const execFileAsync = promisify(execFile)
+import { captureStdout } from '../util/shell-env'
 
 /**
  * Find the user's installed Claude Code binary. GUI apps on macOS don't
@@ -36,33 +33,27 @@ async function isExecutable(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * Detection must never block the settings screen, so every shell-out here is
+ * hard-bounded — see captureStdout for why a plain exec timeout isn't enough.
+ */
 async function resolveViaShell(): Promise<string | null> {
-  try {
-    if (process.platform === 'win32') {
-      const { stdout } = await execFileAsync('where', ['claude'], { timeout: 5000 })
-      const first = stdout.split(/\r?\n/).find((l) => l.trim().length > 0)
-      return first?.trim() ?? null
-    }
-    const shell = process.env.SHELL ?? '/bin/zsh'
-    const { stdout } = await execFileAsync(shell, ['-l', '-c', 'command -v claude'], {
-      timeout: 8000
-    })
-    const path = stdout.trim()
-    return path.length > 0 ? path : null
-  } catch {
-    return null
+  if (process.platform === 'win32') {
+    const stdout = await captureStdout('where', ['claude'], 5000)
+    const first = stdout.split(/\r?\n/).find((l) => l.trim().length > 0)
+    return first?.trim() ?? null
   }
+  const shell = process.env.SHELL ?? '/bin/zsh'
+  const stdout = await captureStdout(shell, ['-l', '-c', 'command -v claude'], 5000)
+  const path = stdout.trim().split('\n').pop()?.trim() ?? ''
+  return path.startsWith('/') ? path : null
 }
 
 async function readVersion(binPath: string): Promise<string | undefined> {
-  try {
-    const { stdout } = await execFileAsync(binPath, ['--version'], { timeout: 15_000 })
-    // Typical output: "2.1.0 (Claude Code)"
-    const match = stdout.trim().match(/(\d+\.\d+\.\d+)/)
-    return match?.[1] ?? stdout.trim().slice(0, 40)
-  } catch {
-    return undefined
-  }
+  const stdout = await captureStdout(binPath, ['--version'], 15_000)
+  // Typical output: "2.1.0 (Claude Code)"
+  const match = stdout.trim().match(/(\d+\.\d+\.\d+)/)
+  return match?.[1] ?? (stdout.trim().slice(0, 40) || undefined)
 }
 
 export async function detectClaudeCli(cliPathOverride?: string): Promise<ClaudeDetection> {

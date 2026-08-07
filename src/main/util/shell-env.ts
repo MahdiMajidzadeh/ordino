@@ -1,7 +1,4 @@
-import { execFile } from 'child_process'
-import { promisify } from 'util'
-
-const execFileAsync = promisify(execFile)
+import { spawn } from 'child_process'
 
 /**
  * GUI-launched apps on macOS/Linux get launchd's minimal environment — no
@@ -11,6 +8,69 @@ const execFileAsync = promisify(execFile)
  * login+interactive shell environment once and fills the gaps.
  */
 let cached: Record<string, string> | null = null
+
+/**
+ * Run a command and return its stdout, giving up after `timeoutMs` no matter
+ * what. Never rejects.
+ *
+ * child_process.exec resolves when stdout *closes*, not when the child exits,
+ * and its `timeout` option doesn't change that — so a shell whose rc files
+ * start a background job that inherits stdout hangs forever. An interactive
+ * shell can also block reading stdin. Both were observed hanging for fifteen
+ * minutes, and this runs during startup, so the bound has to be absolute:
+ * stdin is closed, stderr is discarded, and a timer kills the process and
+ * resolves regardless.
+ */
+export function captureStdout(
+  command: string,
+  args: readonly string[],
+  timeoutMs: number
+): Promise<string> {
+  return new Promise((resolve) => {
+    let out = ''
+    let settled = false
+    const finish = (): void => {
+      if (settled) return
+      settled = true
+      clearTimeout(hardStop)
+      clearTimeout(exitGrace)
+      resolve(out)
+    }
+
+    let child: ReturnType<typeof spawn>
+    try {
+      child = spawn(command, [...args], {
+        stdio: ['ignore', 'pipe', 'ignore'],
+        detached: false
+      })
+    } catch {
+      resolve('')
+      return
+    }
+
+    const hardStop = setTimeout(() => {
+      try {
+        child.kill('SIGKILL')
+      } catch {
+        /* already gone */
+      }
+      finish()
+    }, timeoutMs)
+
+    let exitGrace: NodeJS.Timeout
+    child.stdout?.on('data', (chunk: Buffer) => {
+      out += chunk.toString('utf8')
+    })
+    child.on('error', finish)
+    // 'close' waits for stdio to drain, which a lingering grandchild can hold
+    // open; 'exit' fires as soon as the shell itself is done, so treat that as
+    // the answer after a short flush window.
+    child.on('exit', () => {
+      exitGrace = setTimeout(finish, 150)
+    })
+    child.on('close', finish)
+  })
+}
 
 export function parseEnvNul(output: string): Record<string, string> {
   const env: Record<string, string> = {}
@@ -30,28 +90,15 @@ export async function getLoginShellEnv(): Promise<Record<string, string>> {
     return cached
   }
   const shell = process.env.SHELL ?? '/bin/zsh'
-  try {
-    // -l -i: login + interactive, because proxy exports commonly live in
-    // .zshrc/.bashrc. `command env -0` survives values containing newlines.
-    const { stdout } = await execFileAsync(shell, ['-l', '-i', '-c', 'command env -0'], {
-      timeout: 8000,
-      maxBuffer: 1024 * 1024,
-      encoding: 'utf8'
-    })
-    cached = parseEnvNul(stdout)
-  } catch {
-    try {
-      // Some shells misbehave with -i non-tty; login-only second chance.
-      const { stdout } = await execFileAsync(shell, ['-l', '-c', 'command env -0'], {
-        timeout: 8000,
-        maxBuffer: 1024 * 1024,
-        encoding: 'utf8'
-      })
-      cached = parseEnvNul(stdout)
-    } catch {
-      cached = {}
-    }
+  // -l -i: login + interactive, because proxy exports commonly live in
+  // .zshrc/.bashrc rather than the login-only files. `command env -0`
+  // survives values containing newlines.
+  let stdout = await captureStdout(shell, ['-l', '-i', '-c', 'command env -0'], 5000)
+  if (!stdout.includes('\0')) {
+    // Some shells refuse -i without a tty; login-only second chance.
+    stdout = await captureStdout(shell, ['-l', '-c', 'command env -0'], 5000)
   }
+  cached = parseEnvNul(stdout)
   return cached
 }
 

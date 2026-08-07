@@ -1,10 +1,8 @@
 import { app, shell, BrowserWindow, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici'
 import icon from '../../resources/icon.png?asset'
-import { hydrateProcessEnv } from './util/shell-env'
-import { adoptSystemProxy } from './util/system-proxy'
+import { startNetworkBootstrap } from './util/net-bootstrap'
 import { registerDialogHandlers } from './ipc/handlers/dialog'
 import { registerJobHandlers } from './ipc/handlers/jobs'
 import { registerScanHandlers } from './ipc/handlers/scan'
@@ -94,22 +92,10 @@ app.whenReady().then(async () => {
     app.dock?.setIcon(icon)
   }
 
-  // GUI launches don't inherit the shell environment — adopt it (PATH, proxy
-  // vars from shell init files), then fall back to the OS-level proxy from
-  // Network settings. Finally route main-process fetch through the adopted
-  // HTTP(S)_PROXY / NO_PROXY. Without this, users who reach their AI
-  // provider through a proxy work from a terminal but get failures from a
-  // Dock-launched Ordino.
-  await hydrateProcessEnv()
-  await adoptSystemProxy()
-  const proxy =
-    process.env.HTTPS_PROXY ?? process.env.https_proxy ?? process.env.HTTP_PROXY ?? process.env.http_proxy
-  if (proxy) {
-    setGlobalDispatcher(new EnvHttpProxyAgent())
-  }
-  console.log(
-    `[ordino] name=${app.getName()} userData=${app.getPath('userData')} proxy=${proxy ?? 'none'}`
-  )
+  // Deliberately not awaited — see net-bootstrap for why the window must not
+  // wait on a login shell.
+  startNetworkBootstrap()
+  console.log(`[ordino] name=${app.getName()} userData=${app.getPath('userData')}`)
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

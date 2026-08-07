@@ -30,14 +30,22 @@ describe('detectClaudeCli', () => {
     expect(result).toEqual({ installed: false })
   })
 
-  it('detection on this machine finds a claude or reports cleanly', async () => {
-    // Environment-dependent by nature: assert the shape, not the outcome.
-    const result = await detectClaudeCli()
-    if (result.installed) {
-      expect(result.path).toBeTruthy()
-      expect(['path', 'well-known']).toContain(result.source)
-    } else {
-      expect(result.path).toBeUndefined()
+  it(
+    'detection on this machine finishes quickly and reports cleanly',
+    { timeout: 30_000 },
+    async () => {
+      // Environment-dependent by nature: assert the shape and the bound, not
+      // the outcome. Detection shells out, and an unbounded shell call once
+      // hung this for fifteen minutes.
+      const started = Date.now()
+      const result = await detectClaudeCli()
+      expect(Date.now() - started).toBeLessThan(25_000)
+      if (result.installed) {
+        expect(result.path).toBeTruthy()
+        expect(['path', 'well-known']).toContain(result.source)
+      } else {
+        expect(result.path).toBeUndefined()
+      }
     }
-  })
+  )
 })

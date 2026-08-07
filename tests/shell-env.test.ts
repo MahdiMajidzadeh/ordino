@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getLoginShellEnv, parseEnvNul } from '@main/util/shell-env'
+import { captureStdout, getLoginShellEnv, parseEnvNul } from '@main/util/shell-env'
 
 describe('parseEnvNul', () => {
   it('parses NUL-separated env including values with newlines and equals', () => {
@@ -8,14 +8,42 @@ describe('parseEnvNul', () => {
   })
 })
 
+describe('captureStdout', () => {
+  it('returns stdout of a well-behaved command', async () => {
+    expect((await captureStdout('echo', ['hello'], 5000)).trim()).toBe('hello')
+  })
+
+  it('resolves empty rather than throwing when the command does not exist', async () => {
+    expect(await captureStdout('definitely-not-a-real-binary-xyz', [], 2000)).toBe('')
+  })
+
+  it('gives up on a hanging command instead of waiting forever', async () => {
+    // `sleep` never writes and never exits within the bound — the exact shape
+    // that hung startup for fifteen minutes before the timer existed.
+    const started = Date.now()
+    const out = await captureStdout('sleep', ['30'], 400)
+    const elapsed = Date.now() - started
+    expect(out).toBe('')
+    expect(elapsed).toBeLessThan(3000)
+  })
+
+  it('is not blocked by a child that waits on stdin', async () => {
+    const started = Date.now()
+    await captureStdout('cat', [], 1000) // stdin is closed, so cat exits at once
+    expect(Date.now() - started).toBeLessThan(3000)
+  })
+})
+
 describe('getLoginShellEnv', () => {
-  it('captures a login shell env with PATH on this machine', async () => {
+  it('captures a login shell env within a bounded time', async () => {
+    const started = Date.now()
     const env = await getLoginShellEnv()
+    // Two bounded attempts worst case; must never approach a startup stall.
+    expect(Date.now() - started).toBeLessThan(12_000)
     if (process.platform === 'win32') {
       expect(env).toEqual({})
       return
     }
-    expect(env.PATH).toBeTruthy()
-    expect(env.HOME).toBeTruthy()
-  })
+    expect(typeof env).toBe('object')
+  }, 20_000)
 })

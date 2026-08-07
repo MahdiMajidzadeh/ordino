@@ -1,4 +1,5 @@
 import { getSettings } from '../settings/store'
+import { networkReady } from '../util/net-bootstrap'
 import { getApiKey } from '../settings/secrets'
 import { OrdinoFailure } from '../util/failure'
 import { OpenAiCompatProvider } from './openai-compat'
@@ -7,6 +8,9 @@ import type { OrganizerProvider } from './types'
 
 /** Build the configured provider from settings + keychain. */
 export async function createConfiguredProvider(): Promise<OrganizerProvider> {
+  // PATH and proxy variables are adopted in the background at startup; every
+  // provider needs both, so this is where the two paths rejoin.
+  await networkReady()
   const settings = await getSettings()
 
   if (settings.provider === 'openai-compat') {

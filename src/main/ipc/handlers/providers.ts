@@ -7,6 +7,7 @@ import { getApiKey } from '../../settings/secrets'
 import { detectClaudeCli } from '../../providers/detect-claude'
 import { ClaudeCliProvider } from '../../providers/claude-cli'
 import { OpenAiCompatProvider } from '../../providers/openai-compat'
+import { networkReady } from '../../util/net-bootstrap'
 
 const testSchema = z.discriminatedUnion('provider', [
   z.object({
@@ -35,11 +36,15 @@ const listSchema = z.discriminatedUnion('provider', [
 
 export function registerProviderHandlers(): void {
   handle('provider:detectClaude', null, async () => {
+    // Detection resolves `claude` through PATH, which is only complete once
+    // the shell environment has been adopted.
+    await networkReady()
     const settings = await getSettings()
     return detectClaudeCli(settings.claude.cliPathOverride)
   })
 
   handle('provider:testConnection', testSchema as never, async (req): Promise<TestConnectionResult> => {
+    await networkReady()
     const settings = await getSettings()
     if (req.provider === 'claude-cli') {
       // Explicit key from the form wins; else the stored override; else the
