@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici'
@@ -16,6 +16,35 @@ import { registerApplyHandlers } from './ipc/handlers/apply'
 import { registerHistoryHandlers } from './ipc/handlers/history'
 import { registerExportHandlers } from './ipc/handlers/export'
 import { registerUpdateHandlers } from './updates/updater'
+
+/**
+ * Must run before anything reads app.getPath('userData'), which is derived
+ * from the app name. Dev builds would otherwise use the lowercase package
+ * name while packaged builds use productName — the same folder on macOS but
+ * two different ones on Linux.
+ */
+app.setName('Ordino')
+
+/**
+ * macOS shows the bundle's name in the menu bar, which is "Electron" for a
+ * dev run. An explicit menu built from roles fixes the name while keeping
+ * every standard shortcut — the settings and custom-instruction fields need
+ * working copy/paste.
+ */
+function buildAppMenu(): void {
+  if (process.platform !== 'darwin') {
+    Menu.setApplicationMenu(null) // Windows/Linux use autoHideMenuBar
+    return
+  }
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      { role: 'appMenu' },
+      { role: 'editMenu' },
+      { role: 'viewMenu' },
+      { role: 'windowMenu' }
+    ])
+  )
+}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -52,6 +81,12 @@ function createWindow(): void {
 
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.ordino.app')
+  buildAppMenu()
+  app.setAboutPanelOptions({
+    applicationName: 'Ordino',
+    applicationVersion: app.getVersion(),
+    copyright: 'Organize files with AI'
+  })
 
   // Packaged builds get the icon from the bundle; dev runs would otherwise
   // show Electron's default in the macOS Dock.
@@ -72,7 +107,9 @@ app.whenReady().then(async () => {
   if (proxy) {
     setGlobalDispatcher(new EnvHttpProxyAgent())
   }
-  console.log(`[ordino] outbound proxy: ${proxy ?? 'none'}`)
+  console.log(
+    `[ordino] name=${app.getName()} userData=${app.getPath('userData')} proxy=${proxy ?? 'none'}`
+  )
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

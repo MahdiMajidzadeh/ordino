@@ -1,5 +1,6 @@
 {
   "name": "ordino",
+  "productName": "Ordino",
   "version": "0.1.0",
   "description": "AI-powered file organizer — point at a messy folder, review a semantic organization plan, apply it with full undo.",
   "main": "./out/main/index.js",
