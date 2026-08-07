@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 import { useApp } from '../../stores'
 import { Button } from '../../components/ui/Button'
 import { Banner } from '../../components/ui/Banner'
@@ -27,6 +27,15 @@ export function ScanScreen(): React.JSX.Element {
   const undoStatus = useApp((s) => s.undoStatus)
   const undoRunning = useApp((s) => s.undoRunning)
   const undoLastApply = useApp((s) => s.undoLastApply)
+  const clearScan = useApp((s) => s.clearScan)
+  const clearAnalysis = useApp((s) => s.clearAnalysis)
+
+  /** Drop this folder entirely and return to the picker. */
+  const startOver = (): void => {
+    clearAnalysis()
+    clearScan()
+    goTo('home')
+  }
 
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set())
   const [expandedInitialized, setExpandedInitialized] = useState(false)
@@ -81,12 +90,16 @@ export function ScanScreen(): React.JSX.Element {
         >
           {t(`errors.${scanError.code}`, { defaultValue: scanError.message })}
         </Banner>
-        <Button variant="ghost" onClick={() => goTo('home')}>
-          {t('common.back')}
+        <Button variant="ghost" onClick={startOver}>
+          <ArrowLeft size={14} aria-hidden />
+          {t('scan.chooseAnotherFolder')}
         </Button>
       </div>
     )
   }
+
+  // Gates the primary action: nothing to organize means nothing to configure.
+  const hasFilesToOrganize = scan !== null && !scan.rerun?.nothingToDo && scan.files.length > 0
 
   const name = scan?.rootName ?? quick?.rootName ?? ''
   const fileCount = scan ? scan.files.length : (quick?.fileCount ?? 0)
@@ -149,9 +162,7 @@ export function ScanScreen(): React.JSX.Element {
           <div className="text-lg font-medium">{t('scan.rerun.alreadyOrganized')}</div>
           <p className="max-w-md text-sm text-ink-secondary">{t('scan.rerun.alreadyOrganizedHint')}</p>
           <div className="mt-2 flex gap-2">
-            <Button onClick={() => goTo('home')}>{t('common.back')}</Button>
             <Button
-              variant="ghost"
               onClick={() => {
                 setReorganizeEverything(true)
                 goTo('strategy')
@@ -215,17 +226,32 @@ export function ScanScreen(): React.JSX.Element {
           ) : (
             <div className="flex-1" />
           )}
-
-          <footer className="flex items-center justify-between">
-            <span className="text-sm text-ink-secondary">
-              {t('scan.willAnalyze', { count: includedFiles })}
-            </span>
-            <Button variant="primary" disabled={includedFiles === 0} onClick={() => goTo('strategy')}>
-              {t('scan.chooseStrategy')}
-            </Button>
-          </footer>
         </>
       )}
+
+      {/*
+        Always reachable, including while scanning and when the folder turns
+        out to be empty — otherwise those states are dead ends with no way
+        back to the picker.
+      */}
+      <footer className="mt-auto flex items-center justify-between gap-3 pt-2">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button variant="ghost" onClick={startOver}>
+            <ArrowLeft size={14} aria-hidden />
+            {t('scan.chooseAnotherFolder')}
+          </Button>
+          {hasFilesToOrganize && (
+            <span className="truncate text-sm text-ink-secondary">
+              {t('scan.willAnalyze', { count: includedFiles })}
+            </span>
+          )}
+        </div>
+        {hasFilesToOrganize && (
+          <Button variant="primary" disabled={includedFiles === 0} onClick={() => goTo('strategy')}>
+            {t('scan.chooseStrategy')}
+          </Button>
+        )}
+      </footer>
     </div>
   )
 }

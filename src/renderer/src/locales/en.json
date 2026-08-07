@@ -51,6 +51,7 @@
     "willAnalyze_one": "{{count}} file will be analyzed",
     "willAnalyze_other": "{{count}} files will be analyzed",
     "emptyFolder": "This folder has no files to organize.",
+    "chooseAnotherFolder": "Choose another folder",
     "chooseStrategy": "Choose strategy",
     "rerun": {
       "banner": "Organized before with {{strategy}} · {{inPlace}} files still in place · {{new}} new",
