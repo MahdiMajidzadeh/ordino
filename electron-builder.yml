@@ -41,8 +41,16 @@ mac:
     - NSDocumentsFolderUsageDescription: Ordino organizes files in folders you choose.
     - NSDownloadsFolderUsageDescription: Ordino organizes files in folders you choose.
     - NSDesktopFolderUsageDescription: Ordino organizes files in folders you choose.
+  # Ad-hoc signing. Packaging renames the binary and injects app.asar, which
+  # invalidates the signature Electron shipped with — leaving it broken makes
+  # macOS report the app as "damaged" rather than merely unverified, and the
+  # user gets no way to open it. An ad-hoc signature keeps the bundle
+  # internally consistent so the standard "unidentified developer" override
+  # works. Replace with a Developer ID identity when one exists.
+  identity: '-'
   # --- Signing & notarization (Phase 3 placeholder) -----------------------
   # With a Developer ID certificate installed, flip:
+  # identity: <Developer ID Application: NAME (TEAMID)>
   # hardenedRuntime: true
   # notarize: true    # needs APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID env
   notarize: false
