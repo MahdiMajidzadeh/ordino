@@ -55,7 +55,9 @@ mac:
   # notarize: true    # needs APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID env
   notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  # ${arch} is not optional here: release builds produce an x64 and an arm64
+  # disk image, and without it the second would overwrite the first.
+  artifactName: ${name}-${version}-${arch}.${ext}
 
 linux:
   target:
@@ -73,5 +75,5 @@ npmRebuild: false
 # published there feed electron-updater.
 publish:
   provider: github
-  owner: mahdimajidzadeh
+  owner: MahdiMajidzadeh
   repo: ordino
