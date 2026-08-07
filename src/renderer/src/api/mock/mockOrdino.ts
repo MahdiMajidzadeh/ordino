@@ -396,6 +396,14 @@ export function createMockOrdino(): OrdinoApi {
             hasManifest: false
           }
         ]) as Res<K>
+      case 'app:info':
+        return ok({
+          version: '0.0.0-mock',
+          isPackaged: false,
+          platform: 'darwin' as NodeJS.Platform,
+          arch: 'arm64',
+          electron: '0.0.0'
+        }) as Res<K>
       case 'updates:check':
         return ok({ state: 'none' as const }) as Res<K>
       case 'updates:install':

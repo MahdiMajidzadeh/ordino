@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, ChevronRight, ExternalLink, KeyRound, Plus, X } from 'lucide-react'
 import type { OrdinoError } from '@shared/errors'
-import type { ProviderId } from '@shared/types'
+import type { AppInfo, ProviderId } from '@shared/types'
 import { CLAUDE_MODELS, DEFAULT_OLLAMA_BASE_URL } from '@shared/models'
 import { useApp } from '../../stores'
 import { ordino } from '../../api/client'
@@ -118,10 +118,14 @@ export function SettingsScreen(): React.JSX.Element {
   const [openaiModels, setOpenaiModels] = useState<string[] | null>(null)
   const [modelsFailed, setModelsFailed] = useState(false)
   const [newGlob, setNewGlob] = useState('')
+  const [appInfo, setAppInfo] = useState<AppInfo | null>(null)
 
   useEffect(() => {
     void loadSettings()
     void detectClaude()
+    void ordino.invoke('app:info', undefined).then((res) => {
+      if (res.ok) setAppInfo(res.data)
+    })
   }, [loadSettings, detectClaude])
 
   if (!settings) return <div className="h-full" />
@@ -466,6 +470,28 @@ export function SettingsScreen(): React.JSX.Element {
         <h2 className="text-sm font-medium">{t('settings.privacy.title')}</h2>
         <p className="text-xs text-ink-secondary">{t('settings.privacy.statement')}</p>
         <p className="text-xs text-ink-faint">{t('settings.privacy.localNote')}</p>
+      </section>
+
+      {/* ---- About ---- */}
+      <section className="space-y-1 rounded-xl border border-line bg-surface-1 p-4">
+        <h2 className="text-sm font-medium">{t('settings.about.title')}</h2>
+        <p className="text-xs text-ink-secondary">
+          {appInfo
+            ? t('settings.about.version', { version: appInfo.version })
+            : t('settings.about.versionUnknown')}
+          {appInfo && !appInfo.isPackaged ? ` · ${t('settings.about.devBuild')}` : ''}
+        </p>
+        {appInfo && (
+          <p className="text-xs text-ink-faint">
+            {[
+              appInfo.buildRef,
+              `${appInfo.platform}-${appInfo.arch}`,
+              `Electron ${appInfo.electron}`
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        )}
       </section>
     </div>
   )

@@ -340,3 +340,15 @@ export interface UpdateStatus {
   version?: string
   detail?: string
 }
+
+/** Build identity, shown in Settings → About. */
+export interface AppInfo {
+  /** package.json version — CI rewrites it from the pushed git tag. */
+  version: string
+  /** The exact tag the release was built from; absent in local builds. */
+  buildRef?: string
+  isPackaged: boolean
+  platform: NodeJS.Platform
+  arch: string
+  electron: string
+}

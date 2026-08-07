@@ -265,6 +265,12 @@
       "title": "Privacy",
       "statement": "Ordino sends file names and metadata to your chosen AI provider — never file contents.",
       "localNote": "With a local endpoint like Ollama, nothing leaves your machine at all."
+    },
+    "about": {
+      "title": "About",
+      "version": "Ordino {{version}}",
+      "versionUnknown": "Ordino",
+      "devBuild": "development build"
     }
   },
   "errors": {

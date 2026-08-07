@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { startNetworkBootstrap } from './util/net-bootstrap'
+import { registerAppHandlers } from './ipc/handlers/app-info'
 import { registerDialogHandlers } from './ipc/handlers/dialog'
 import { registerJobHandlers } from './ipc/handlers/jobs'
 import { registerScanHandlers } from './ipc/handlers/scan'
@@ -101,6 +102,7 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  registerAppHandlers()
   registerDialogHandlers()
   registerJobHandlers()
   registerScanHandlers()

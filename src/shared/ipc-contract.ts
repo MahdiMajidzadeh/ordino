@@ -3,6 +3,7 @@ import type {
   AnalysisProgress,
   AnalysisRequest,
   AnalysisResult,
+  AppInfo,
   ApplyProgress,
   ApplyRequest,
   ApplyResult,
@@ -30,6 +31,7 @@ import type {
  * arms so errors keep their codes.
  */
 export interface IpcInvokeMap {
+  'app:info': { req: void; res: AppInfo }
   'dialog:pickFolder': { req: void; res: string | null }
   'scan:quick': { req: { rootPath: string }; res: QuickScanSummary }
   'scan:folder': { req: { rootPath: string }; res: ScanResult }
