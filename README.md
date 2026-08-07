@@ -65,6 +65,16 @@ npm run build:linux  # AppImage + deb
 
 Signing/notarization are scaffolded but disabled until certificates are configured — see the placeholders in [electron-builder.yml](electron-builder.yml) and [.github/workflows/build.yml](.github/workflows/build.yml). Auto-update (electron-updater) is wired to GitHub Releases and activates in packaged builds.
 
+### Cutting a release
+
+Pushing a `v*` tag is the whole process:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+CI stamps `package.json` with the tag (so the version the app reports in Settings → About is the tag it was built from), builds the macOS `.dmg` for both Intel and Apple Silicon plus the Windows and Linux installers, uploads them to a draft GitHub release, and publishes that release once every installer is in place. The tag must be valid semver — `v0.2.0`, not `release-2`.
+
 ## Architecture notes
 
 - `src/shared/` — the typed IPC contract (`ipc-contract.ts`, `ordino-api.ts`) both processes compile against; contract drift between the mock and main is a compile error.
